@@ -7,7 +7,7 @@
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="146dp"
+        android:layout_height="61dp"
         android:orientation="horizontal" >
 
         <Button
@@ -23,24 +23,8 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:layout_toLeftOf="@id/search_button" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Lat"
-            android:id="@+id/Lat"
-            android:layout_below="@+id/search_button"
-            android:layout_alignParentStart="true" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Long"
-            android:id="@+id/Long"
-            android:layout_below="@+id/Lat"
-            android:layout_alignParentStart="true" />
-
+            android:layout_toLeftOf="@id/search_button"
+            android:layout_alignBottom="@+id/search_button" />
     </RelativeLayout>
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"

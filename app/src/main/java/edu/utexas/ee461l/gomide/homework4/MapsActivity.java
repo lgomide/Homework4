@@ -5,29 +5,25 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 
 public class MapsActivity extends FragmentActivity {
 
@@ -52,21 +48,20 @@ public class MapsActivity extends FragmentActivity {
         HttpClient httpclient = new DefaultHttpClient();
         EditText text = (EditText) findViewById(R.id.search);
         String search = text.getText().toString().replace(' ','+');
-        String search1 = "austin+texas";
-        String URL = "https://maps.googleapis.com/maps/api/place/textsearch/json?query="+search1+"&key=AIzaSyBe6AzhgPr3_woVf-og516xfxTezdUM6n4";
+        String URL = "https://maps.googleapis.com/maps/api/place/textsearch/json?query="+search+"&key=AIzaSyAJaq4XgLly78-mQOiuYf0PGBzQ7mQZnCQ";
         try {
             HttpResponse response = httpclient.execute(new HttpGet(URL));
-            BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
-            StringBuilder builder = new StringBuilder();
-            for (String line = null; (line = reader.readLine()) != null;) {
-                builder.append(line).append("\n");
-            }
-            JSONTokener tokener = new JSONTokener(builder.toString());
-            JSONArray results = new JSONArray(tokener);
+            HttpEntity httpEntity = response.getEntity();
+            String jsonString = EntityUtils.toString(httpEntity);
+            JSONObject result = new JSONObject(jsonString);
+            JSONArray results = result.getJSONArray("results");
             JSONObject place = results.getJSONObject(0);
-            String lat = place.getJSONObject("geometry").getJSONObject("location").getString("lat");
-            TextView latitude = (TextView) findViewById(R.id.Lat);
-            latitude.setText(lat);
+            String name = place.getString("name");
+            Double lat = place.getJSONObject("geometry").getJSONObject("location").getDouble("lat");
+            Double lng = place.getJSONObject("geometry").getJSONObject("location").getDouble("lng");
+            LatLng placeLatLng = new LatLng(lat,lng);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(placeLatLng, 13));
+            mMap.addMarker(new MarkerOptions().position(placeLatLng).title(name));
 
         } catch(ClientProtocolException e) {
             e.printStackTrace();
@@ -78,41 +73,15 @@ public class MapsActivity extends FragmentActivity {
 
     }
 
-    /**
-     * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
-     * installed) and the map has not already been instantiated.. This will ensure that we only ever
-     * call {@link #setUpMap()} once when {@link #mMap} is not null.
-     * <p>
-     * If it isn't installed {@link SupportMapFragment} (and
-     * {@link com.google.android.gms.maps.MapView MapView}) will show a prompt for the user to
-     * install/update the Google Play services APK on their device.
-     * <p>
-     * A user can return to this FragmentActivity after following the prompt and correctly
-     * installing/updating/enabling the Google Play services. Since the FragmentActivity may not
-     * have been completely destroyed during this process (it is likely that it would only be
-     * stopped or paused), {@link #onCreate(Bundle)} may not be called again so we should call this
-     * method in {@link #onResume()} to guarantee that it will be called.
-     */
+
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
             // Try to obtain the map from the SupportMapFragment.
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
                     .getMap();
-            // Check if we were successful in obtaining the map.
-            if (mMap != null) {
-                setUpMap();
-            }
         }
     }
 
-    /**
-     * This is where we can add markers or lines, add listeners or move the camera. In this case, we
-     * just add a marker near Africa.
-     * <p>
-     * This should only be called once and when we are sure that {@link #mMap} is not null.
-     */
-    private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
-    }
+
 }
