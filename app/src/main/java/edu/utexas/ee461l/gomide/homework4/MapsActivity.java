@@ -38,6 +38,7 @@ public class MapsActivity extends FragmentActivity {
         StrictMode.setThreadPolicy(policy);
     }
 
+    //Changes the types of maps asdf
     public void changeMap(View v){
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
     }
