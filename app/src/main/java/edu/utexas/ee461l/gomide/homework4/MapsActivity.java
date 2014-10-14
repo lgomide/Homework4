@@ -38,6 +38,18 @@ public class MapsActivity extends FragmentActivity {
         StrictMode.setThreadPolicy(policy);
     }
 
+    public void changeMap(View v){
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+    }
+
+    public void changeMap2(View v){
+        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+    }
+
+    public void changeMap3(View v){
+        mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
