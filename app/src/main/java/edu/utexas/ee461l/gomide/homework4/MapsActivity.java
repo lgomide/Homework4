@@ -1,12 +1,33 @@
 package edu.utexas.ee461l.gomide.homework4;
 
+import android.os.StrictMode;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 public class MapsActivity extends FragmentActivity {
 
@@ -17,12 +38,44 @@ public class MapsActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         setUpMapIfNeeded();
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+    }
+
+    public void searchMap(View v){
+        HttpClient httpclient = new DefaultHttpClient();
+        EditText text = (EditText) findViewById(R.id.search);
+        String search = text.getText().toString().replace(' ','+');
+        String search1 = "austin+texas";
+        String URL = "https://maps.googleapis.com/maps/api/place/textsearch/json?query="+search1+"&key=AIzaSyBe6AzhgPr3_woVf-og516xfxTezdUM6n4";
+        try {
+            HttpResponse response = httpclient.execute(new HttpGet(URL));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+            StringBuilder builder = new StringBuilder();
+            for (String line = null; (line = reader.readLine()) != null;) {
+                builder.append(line).append("\n");
+            }
+            JSONTokener tokener = new JSONTokener(builder.toString());
+            JSONArray results = new JSONArray(tokener);
+            JSONObject place = results.getJSONObject(0);
+            String lat = place.getJSONObject("geometry").getJSONObject("location").getString("lat");
+            TextView latitude = (TextView) findViewById(R.id.Lat);
+            latitude.setText(lat);
+
+        } catch(ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e){
+            e.printStackTrace();
+        } catch (JSONException e){
+            e.printStackTrace();
+        }
+
     }
 
     /**
