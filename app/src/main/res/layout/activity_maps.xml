@@ -15,7 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Search"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:onClick="searchMap" />
 
         <EditText
@@ -23,17 +23,20 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:layout_toLeftOf="@id/search_button"
+            android:layout_toStartOf="@id/search_button"
             android:layout_alignBottom="@+id/search_button" />
 
 
     </RelativeLayout>
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="394dp"
-        class="com.google.android.gms.maps.SupportMapFragment" />
+        map:uiCompass="false"
+        class="com.google.android.gms.maps.SupportMapFragment"
+        />
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="61dp"

@@ -1,5 +1,7 @@
 package edu.utexas.ee461l.gomide.homework4;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.StrictMode;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.widget.EditText;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -24,10 +27,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class MapsActivity extends FragmentActivity {
 
-    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    private GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +44,6 @@ public class MapsActivity extends FragmentActivity {
         StrictMode.setThreadPolicy(policy);
     }
 
-    //Changes the types of maps asdf
     public void changeMap(View v){
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
     }
@@ -61,20 +66,28 @@ public class MapsActivity extends FragmentActivity {
         HttpClient httpclient = new DefaultHttpClient();
         EditText text = (EditText) findViewById(R.id.search);
         String search = text.getText().toString().replace(' ','+');
-        String URL = "https://maps.googleapis.com/maps/api/place/textsearch/json?query="+search+"&key=AIzaSyAJaq4XgLly78-mQOiuYf0PGBzQ7mQZnCQ";
+        String url = "https://maps.googleapis.com/maps/api/place/textsearch/json?query="+search+"&key=AIzaSyAJaq4XgLly78-mQOiuYf0PGBzQ7mQZnCQ";
         try {
-            HttpResponse response = httpclient.execute(new HttpGet(URL));
+            HttpResponse response = httpclient.execute(new HttpGet(url));
             HttpEntity httpEntity = response.getEntity();
             String jsonString = EntityUtils.toString(httpEntity);
             JSONObject result = new JSONObject(jsonString);
             JSONArray results = result.getJSONArray("results");
             JSONObject place = results.getJSONObject(0);
             String name = place.getString("name");
+            String fullName = place.getString("formatted_address");
+            String icon = place.getString("icon");
             Double lat = place.getJSONObject("geometry").getJSONObject("location").getDouble("lat");
             Double lng = place.getJSONObject("geometry").getJSONObject("location").getDouble("lng");
+            URL icon_url = new URL(icon);
+            HttpURLConnection conn = (HttpURLConnection) icon_url.openConnection();
+            conn.setDoInput(true);
+            conn.connect();
+            InputStream is = conn.getInputStream();
+            Bitmap bmImg = BitmapFactory.decodeStream(is);
             LatLng placeLatLng = new LatLng(lat,lng);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(placeLatLng, 13));
-            mMap.addMarker(new MarkerOptions().position(placeLatLng).title(name));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(placeLatLng, 15));
+            mMap.addMarker(new MarkerOptions().position(placeLatLng).title(name).icon(BitmapDescriptorFactory.fromBitmap(bmImg)).snippet(fullName));
 
         } catch(ClientProtocolException e) {
             e.printStackTrace();
